@@ -349,8 +349,8 @@ Returns list of spdz-share."
                        collect (random-below prime)))
          (last-share (mod (- secret (reduce #'+ shares)) prime))
          (all-shares (append shares (list last-share)))
-         ;; MAC = alpha * secret
-         (mac (* alpha secret))
+         ;; MAC = alpha * secret mod prime
+         (mac (mpc-mod-mul alpha secret prime))
          (mac-shares (loop repeat (1- n)
                            collect (random-below prime)))
          (last-mac (mod (- mac (reduce #'+ mac-shares)) prime))
@@ -431,15 +431,17 @@ z = c + e*a + d*b + d*e (where d*e is added by party 1 only)."
 ;;; SPDZ Opening and MAC Check
 ;;; ============================================================================
 
-(defun spdz-open (shares)
+(defun spdz-open (shares &key (prime +secp256k1-order+))
   "Open a secret by summing all shares. Returns opened value."
-  (reduce #'+ (mapcar #'spdz-share-value shares)))
+  (mod (reduce #'+ (mapcar #'spdz-share-value shares)) prime))
 
 (defun spdz-mac-check (opened-value shares mac-key-shares &key (prime +secp256k1-order+))
   "Verify MAC on opened value.
-Check: sum(mac_i) = alpha * opened_value."
+Check: sum(mac_i) = alpha * opened_value.
+Note: mac-key-shares are Shamir shares, so we use Lagrange interpolation to reconstruct alpha."
   (let* ((mac-sum (mod (reduce #'+ (mapcar #'spdz-share-mac shares)) prime))
-         (alpha-value (mod (reduce #'+ (mapcar #'secret-share-value mac-key-shares)) prime))
+         ;; Reconstruct alpha from Shamir shares using Lagrange interpolation
+         (alpha-value (reconstruct-secret mac-key-shares :prime prime))
          (expected (mpc-mod-mul alpha-value opened-value prime)))
     (= mac-sum expected)))
 

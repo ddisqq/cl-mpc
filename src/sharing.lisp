@@ -150,12 +150,16 @@ Used in proactive secret sharing."
   #xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F)
 
 (defun feldman-vss-split (secret n threshold &key
-                                              (prime +secp256k1-order+)
+                                              (prime nil)
                                               (generator *default-generator*)
                                               (group-prime *default-prime-group*))
   "Split SECRET using Feldman VSS with publicly verifiable commitments.
-Returns (values shares commitment)."
-  (let* ((coeffs (generate-polynomial secret threshold prime))
+Returns (values shares commitment).
+Note: PRIME defaults to (group-prime - 1) for correct verification."
+  ;; For Feldman VSS, polynomial operations must be mod (group-prime - 1)
+  ;; which is the order of the multiplicative group
+  (let* ((prime (or prime (1- group-prime)))
+         (coeffs (generate-polynomial secret threshold prime))
          ;; Compute commitments g^a_i mod group-prime
          (commitments (mapcar (lambda (coeff)
                                 (mpc-mod-expt generator coeff group-prime))
@@ -171,7 +175,6 @@ Returns (values shares commitment)."
     (values shares commitment)))
 
 (defun feldman-vss-verify (share commitment &key
-                                             (prime +secp256k1-order+)
                                              (group-prime *default-prime-group*))
   "Verify a Feldman VSS share against commitment.
 Checks that g^share = product of C_j^(i^j) for j=0..t-1."
@@ -179,13 +182,15 @@ Checks that g^share = product of C_j^(i^j) for j=0..t-1."
          (coeffs (vss-commitment-coefficients commitment))
          (i (vss-share-index share))
          (value (vss-share-value share))
-         ;; Left side: g^value
+         ;; Left side: g^value mod group-prime
          (left (mpc-mod-expt g value group-prime))
-         ;; Right side: product of C_j^(i^j)
+         ;; Right side: product of C_j^(i^j) mod group-prime
+         ;; Exponents are computed mod (group-prime - 1) by Fermat's little theorem
+         (exp-mod (1- group-prime))
          (right 1))
     (loop for j from 0
           for cj in coeffs
-          do (let ((i-to-j (mpc-mod-expt i j prime)))
+          do (let ((i-to-j (mpc-mod-expt i j exp-mod)))
                (setf right (mod (* right (mpc-mod-expt cj i-to-j group-prime))
                                group-prime))))
     (= left right)))

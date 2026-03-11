@@ -66,11 +66,17 @@
          :id wire-id
          :label0 label0
          :label1 label1))
-      ;; Standard: two independent random labels
-      (make-garbled-wire
-       :id wire-id
-       :label0 (make-random-wire-label)
-       :label1 (make-random-wire-label))))
+      ;; Standard: two independent random labels with opposite pointer bits
+      ;; Point-and-permute requires label0 and label1 to have different pointer bits
+      (let* ((label0 (make-random-wire-label))
+             (label1 (make-random-wire-label)))
+        ;; Ensure opposite pointer bits for proper point-and-permute
+        (setf (wire-label-pointer-bit label1)
+              (logxor 1 (wire-label-pointer-bit label0)))
+        (make-garbled-wire
+         :id wire-id
+         :label0 label0
+         :label1 label1))))
 
 (defun generate-global-offset ()
   "Generate global offset for Free XOR. LSB must be 1."
@@ -86,13 +92,20 @@
 ;;; ============================================================================
 
 (defun garble-encrypt (key1 key2 gate-id row-index plaintext)
-  "Encrypt plaintext using double-key cipher with tweak."
+  "Encrypt plaintext using double-key cipher with tweak.
+Embeds pointer-bit into the encrypted data."
   (let* ((tweak (logior (ash gate-id 2) row-index))
          (combined-key (xor-bytes (wire-label-value key1)
                                    (wire-label-value key2)))
-         (derived-key (hash-to-key combined-key tweak)))
+         (derived-key (hash-to-key combined-key tweak))
+         ;; Copy plaintext value and embed pointer-bit in LSB of last byte
+         (pt-with-pointer (copy-seq (wire-label-value plaintext))))
+    ;; Set LSB of last byte to pointer-bit
+    (setf (aref pt-with-pointer 15)
+          (logior (logand (aref pt-with-pointer 15) #xFE)
+                  (wire-label-pointer-bit plaintext)))
     (xor-bytes (aes-encrypt-block derived-key derived-key)
-               (wire-label-value plaintext))))
+               pt-with-pointer)))
 
 (defun garble-decrypt (key1 key2 gate-id row-index ciphertext)
   "Decrypt ciphertext using double-key cipher with tweak."
@@ -108,14 +121,20 @@
 ;;; ============================================================================
 
 (defun garble-gate-standard (gate-type in1 in2 out gate-id)
-  "Garble a gate using standard 4-row table."
+  "Garble a gate using standard 4-row table with point-and-permute."
   (let* ((truth-table (case gate-type
                         (:and '((0 0 0) (0 1 0) (1 0 0) (1 1 1)))
                         (:or  '((0 0 0) (0 1 1) (1 0 1) (1 1 1)))
                         (:xor '((0 0 0) (0 1 1) (1 0 1) (1 1 0)))
                         (:nand '((0 0 1) (0 1 1) (1 0 1) (1 1 0)))
                         (:nor '((0 0 1) (0 1 0) (1 0 0) (1 1 0)))))
-         (table '()))
+         ;; Pre-compute pointer bits for each label
+         (p0-in1 (wire-label-pointer-bit (garbled-wire-label0 in1)))
+         (p1-in1 (wire-label-pointer-bit (garbled-wire-label1 in1)))
+         (p0-in2 (wire-label-pointer-bit (garbled-wire-label0 in2)))
+         (p1-in2 (wire-label-pointer-bit (garbled-wire-label1 in2)))
+         ;; Create a 4-element table indexed by row-idx (0-3)
+         (table (make-array 4 :initial-element nil)))
     ;; Generate permuted table entries
     (dolist (row truth-table)
       (let* ((a (first row))
@@ -130,13 +149,16 @@
              (plaintext (if (zerop c)
                             (garbled-wire-label0 out)
                             (garbled-wire-label1 out)))
-             ;; Row index based on pointer bits
-             (row-idx (logior (ash (wire-label-pointer-bit key1) 1)
-                              (wire-label-pointer-bit key2)))
+             ;; Row index based on pointer bits of the actual keys used
+             (p1 (if (zerop a) p0-in1 p1-in1))
+             (p2 (if (zerop b) p0-in2 p1-in2))
+             (row-idx (logior (ash p1 1) p2))
              (ciphertext (garble-encrypt key1 key2 gate-id row-idx plaintext)))
-        (push (cons row-idx ciphertext) table)))
-    ;; Sort by row index
-    (sort table #'< :key #'car)))
+        (setf (aref table row-idx) ciphertext)))
+    ;; Convert to alist format
+    (loop for i from 0 below 4
+          when (aref table i)
+          collect (cons i (aref table i)))))
 
 ;;; ============================================================================
 ;;; Free XOR Optimization
@@ -355,9 +377,10 @@ OPTIMIZATION: :standard, :free-xor, :half-gates, or :row-reduction"
                       h-b
                       (xor-bytes h-b (xor-bytes te (wire-label-value in1))))))
          (make-wire-label :value (xor-bytes wg we)
-                          :pointer-bit (logxor (logand sa sb)
-                                               (aref wg 15)
-                                               (aref we 15)))))
+                          :pointer-bit (logand 1
+                                               (logxor (logand sa sb)
+                                                       (aref wg 15)
+                                                       (aref we 15))))))
       ;; Standard or row-reduced
       (t
        (let* ((row-idx (logior (ash (wire-label-pointer-bit in1) 1)
