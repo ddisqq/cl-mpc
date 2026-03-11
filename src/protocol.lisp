@@ -1,3 +1,6 @@
+;;;; Copyright (c) 2024-2026 Parkian Company LLC. All rights reserved.
+;;;; SPDX-License-Identifier: BSD-3-Clause
+
 ;;;; protocol.lisp - MPC Protocol implementations
 ;;;; Oblivious Transfer (1-of-2, 1-of-n, Extensions) and SPDZ
 
