@@ -28,4 +28,6 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
   :components ((:module "test"
                 :components ((:file "test-suite"))))
   :perform (asdf:test-op (op c)
-             (uiop:symbol-call :cl-mpc/test :run-all-tests)))
+             (let ((result (uiop:symbol-call :cl-mpc/test :run-all-tests)))
+               (unless result
+                 (error "Tests failed")))))
