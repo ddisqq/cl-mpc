@@ -1,5 +1,5 @@
 ;;;; Copyright (c) 2024-2026 Parkian Company LLC. All rights reserved.
-;;;; SPDX-License-Identifier: BSD-3-Clause
+;;;; SPDX-License-Identifier: Apache-2.0
 
 ;;;; garbled.lisp - Garbled Circuits implementation
 ;;;; Yao's protocol with Free XOR, Half-Gates, and Row Reduction optimizations

@@ -11,7 +11,7 @@
 Implements Shamir Secret Sharing, Verifiable Secret Sharing (Feldman/Pedersen),
 Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ protocol."
   :author "Parkian Company LLC"
-  :license "BSD-3-Clause"
+  :license "Apache-2.0"
   :version "0.1.0"
   :depends-on ()
   :serial t
