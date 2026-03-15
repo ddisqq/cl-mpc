@@ -10,18 +10,17 @@
   :description "Pure Common Lisp Multi-Party Computation library with zero external dependencies.
 Implements Shamir Secret Sharing, Verifiable Secret Sharing (Feldman/Pedersen),
 Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ protocol."
-  :author "Parkian Company LLC"
+  :author "Park Ian Co"
   :license "Apache-2.0"
   :version "0.1.0"
   :depends-on ()
   :serial t
   :components ((:file "package")
                (:module "src"
-                :serial t
-                :components ((:file "util")
-                             (:file "sharing")
-                             (:file "garbled")
-                             (:file "protocol"))))
+                :components ((:file "package")
+                             (:file "conditions" :depends-on ("package"))
+                             (:file "types" :depends-on ("package"))
+                             (:file "cl-mpc" :depends-on ("package" "conditions" "types"))))))
   :in-order-to ((asdf:test-op (asdf:test-op #:cl-mpc/test))))
 
 (asdf:defsystem #:cl-mpc/test

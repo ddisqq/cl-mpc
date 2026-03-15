@@ -11,11 +11,17 @@ Implements Shamir Secret Sharing, Verifiable Secret Sharing (Feldman/Pedersen),
 Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ protocol.")
 
   ;; Constants
-  (:export #:+secp256k1-order+
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:+secp256k1-order+
            #:+wire-label-bytes+)
 
   ;; Utility functions
-  (:export #:get-random-bytes
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:get-random-bytes
            #:random-integer
            #:random-below
            #:integer-to-bytes
@@ -27,7 +33,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:hash-to-key)
 
   ;; Modular arithmetic
-  (:export #:mpc-mod
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:mpc-mod
            #:mpc-mod-add
            #:mpc-mod-sub
            #:mpc-mod-mul
@@ -37,7 +46,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:lagrange-interpolate)
 
   ;; Secret Sharing types
-  (:export #:secret-share
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:secret-share
            #:secret-share-index
            #:secret-share-value
            #:secret-share-threshold
@@ -53,7 +65,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:share-commitment-p)
 
   ;; Shamir Secret Sharing
-  (:export #:split-secret
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:split-secret
            #:reconstruct-secret
            #:verify-share
            #:refresh-shares
@@ -62,7 +77,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:scalar-mul-share)
 
   ;; Verifiable Secret Sharing
-  (:export #:vss-commitment
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:vss-commitment
            #:vss-commitment-coefficients
            #:vss-commitment-generator
            #:make-vss-commitment
@@ -81,7 +99,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:pedersen-vss-verify)
 
   ;; Distributed Key Generation
-  (:export #:dkg-party-state
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:dkg-party-state
            #:dkg-party-state-id
            #:dkg-party-state-threshold
            #:dkg-party-state-num-parties
@@ -101,16 +122,25 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:dkg-complete)
 
   ;; Proactive Secret Sharing
-  (:export #:proactive-refresh
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:proactive-refresh
            #:proactive-update-share)
 
   ;; MPC Arithmetic
-  (:export #:mpc-add-shares
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:mpc-add-shares
            #:mpc-sub-shares
            #:mpc-scalar-mul-share)
 
   ;; Beaver Triples
-  (:export #:beaver-triple
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:beaver-triple
            #:beaver-triple-a
            #:beaver-triple-b
            #:beaver-triple-c
@@ -120,11 +150,17 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:mpc-multiply-shares-beaver)
 
   ;; Packed Secret Sharing
-  (:export #:packed-split-secrets
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:packed-split-secrets
            #:packed-reconstruct-secrets)
 
   ;; Oblivious Transfer types
-  (:export #:ot-sender-state
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:ot-sender-state
            #:ot-sender-state-private-key
            #:ot-sender-state-public-key
            #:make-ot-sender-state
@@ -143,47 +179,71 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:ot-message-p)
 
   ;; 1-of-2 Oblivious Transfer
-  (:export #:ot-sender-init
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:ot-sender-init
            #:ot-receiver-choose
            #:ot-sender-transfer
            #:ot-receiver-decrypt)
 
   ;; 1-of-n Oblivious Transfer
-  (:export #:ot-n-sender-init
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:ot-n-sender-init
            #:ot-n-receiver-choose
            #:ot-n-sender-transfer
            #:ot-n-receiver-decrypt)
 
   ;; Base OT (Chou-Orlandi)
-  (:export #:base-ot-sender-setup
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:base-ot-sender-setup
            #:base-ot-receiver-choose
            #:base-ot-sender-encrypt
            #:base-ot-receiver-decrypt)
 
   ;; OT Extension (IKNP)
-  (:export #:ot-extension-state
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:ot-extension-state
            #:ot-extension-init
            #:ot-extension-receiver-setup
            #:ot-extension-sender-respond
            #:ot-extension-transfer)
 
   ;; Random OT
-  (:export #:random-ot-sender-init
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:random-ot-sender-init
            #:random-ot-receiver-choose
            #:random-ot-complete)
 
   ;; Correlated OT
-  (:export #:correlated-ot-sender-init
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:correlated-ot-sender-init
            #:correlated-ot-receiver-choose
            #:correlated-ot-complete)
 
   ;; Batched OT
-  (:export #:batched-ot-sender-init
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:batched-ot-sender-init
            #:batched-ot-receiver-choose
            #:batched-ot-transfer)
 
   ;; Garbled Circuit types
-  (:export #:wire-label
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:wire-label
            #:wire-label-value
            #:wire-label-pointer-bit
            #:make-wire-label
@@ -214,7 +274,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:garbled-circuit-p)
 
   ;; Garbled Circuit operations
-  (:export #:generate-wire-labels
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:generate-wire-labels
            #:garble-and-gate
            #:garble-xor-gate
            #:garble-and-gate-half-gates
@@ -225,12 +288,18 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:decode-output)
 
   ;; 2PC Protocol
-  (:export #:gc-2pc-garble
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:gc-2pc-garble
            #:gc-2pc-evaluate
            #:gc-2pc-run)
 
   ;; Example circuits
-  (:export #:make-and-circuit
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:make-and-circuit
            #:make-or-circuit
            #:make-xor-circuit
            #:make-not-circuit
@@ -240,7 +309,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:make-comparator-circuit)
 
   ;; SPDZ types
-  (:export #:spdz-share
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:spdz-share
            #:spdz-share-value
            #:spdz-share-mac
            #:make-spdz-share
@@ -254,7 +326,10 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:spdz-party-p)
 
   ;; SPDZ operations
-  (:export #:generate-mac-key-shares
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:generate-mac-key-shares
            #:spdz-share-secret
            #:spdz-add
            #:spdz-subtract
@@ -266,12 +341,18 @@ Distributed Key Generation, Oblivious Transfer, Garbled Circuits, and SPDZ proto
            #:spdz-mac-check)
 
   ;; SPDZ protocol execution
-  (:export #:run-spdz-addition
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:run-spdz-addition
            #:run-spdz-multiplication
            #:run-spdz-circuit)
 
   ;; High-level interface
-  (:export #:mpc-session
+  (:export
+   #:with-mpc-timing
+   #:mpc-batch-process
+   #:mpc-health-check#:mpc-session
            #:mpc-session-parties
            #:mpc-session-threshold
            #:make-mpc-session
